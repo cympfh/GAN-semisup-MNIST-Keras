@@ -1,0 +1,7 @@
+Pillow
+click
+flake8
+numpy
+scipy
+tensorflow
+Keras
