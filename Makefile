@@ -5,7 +5,16 @@ b:
 	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 500
 
 c:
-	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 100
+	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 100 --epochs 1000
+
+d:
+	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 10,10,10,10,10,90,90,90,90,90
+
+e:
+	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 2000,2000,1000,0,0,0,0,0,0,0
+
+f:
+	CUDA_VISIBLE_DEVICES=$(shell empty-gpu-device) python main.py train --name $(shell date "+%Y-%m-%d-%s") -l 100 -u 5000,1,1,1,1,1,1,1,1,1
 
 ## training mode (newly)
 train:
@@ -17,7 +26,7 @@ test:
 
 ## visplot a log
 log:
-		visplot --smoothing 2 -x epoch -y acc,val_acc $(shell ls -1 logs/*.json)
+	bash script/log.sh
 
 .DEFAULT_GOAL := help
 
