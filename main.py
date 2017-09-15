@@ -59,10 +59,9 @@ def train(name, epochs, batch_size, labels, unlabels, noise_type, resume):
 
     # dataset
     echo('dataset loading...')
-    train_l, train_u, test = dataset.batch_generator(labels, unlabels, batch_size=batch_size)
+    train_l, train_u, test_dataset = dataset.batch_generator(labels, unlabels, batch_size=batch_size)
     gen_train_l, num_train_l = train_l
     gen_train_u, num_train_u = train_u
-    data_test, num_test = test
 
     TRUE = numpy.ones((batch_size,)) - .1
     FALSE = numpy.zeros((batch_size,))
@@ -103,15 +102,17 @@ def train(name, epochs, batch_size, labels, unlabels, noise_type, resume):
         INTERVAL = min(INTERVAL, m)
         for i in range(m):
 
-            # classifier
-            X, Y = next(gen_train_l)
-            loss, acc = clf.train_on_batch(X, Y)
-            clf_loss += loss
-            clf_acc += acc
+            if num_train_l > 0:
+                # classifier
+                X, Y = next(gen_train_l)
+                loss, acc = clf.train_on_batch(X, Y)
+                clf_loss += loss
+                clf_acc += acc
 
-            # discriminator for true
-            X = next(gen_train_u)
-            dis_true_loss += dis.train_on_batch(X, TRUE)
+            if num_train_u > 0:
+                # discriminator for true
+                X = next(gen_train_u)
+                dis_true_loss += dis.train_on_batch(X, TRUE)
 
             # discriminator for fake
             z = make_noise()
@@ -149,7 +150,7 @@ def train(name, epochs, batch_size, labels, unlabels, noise_type, resume):
                 dis_false_loss = 0
                 gen_loss = 0
 
-        val_clf_loss, val_clf_acc = clf.test_on_batch(data_test[0], data_test[1])
+        val_clf_loss, val_clf_acc = clf.test_on_batch(*test_dataset)
         print("| val: clf={:.4f} (acc={:.4f})".format(val_clf_loss, val_clf_acc))
         lib.test.image_save(x_fake, '{base}/{epoch:03d}.{{i:03d}}.png'.format(base=result_dir, epoch=_epoch))
         lib.log.write(log_path, {

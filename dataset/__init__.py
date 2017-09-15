@@ -53,13 +53,21 @@ def batch_generator(labels, unlabels, batch_size=50, aug=False):
             u_indices.append(i)
             u_count[klass] += 1
 
-    assert len(l_indices) > 0, 'No items are labeeld. see --labels'
-    assert len(u_indices) > 0, 'No items are unlabeled. see --unlabels'
-    print("{} items are labeled".format(len(l_indices)))
-    print("rest {} item are unlabeled".format(len(u_indices)))
+    if len(l_indices) == 0:
+        print('[WARN] No labeled items')
+        gen_train_l = None
+    else:
+        print("[INFO] {} items are labeled".format(len(l_indices)))
+        gen_train_l = generator_generator(batch_size, (x_train, y_train), l_indices)
 
-    gen_train_l = generator_generator(batch_size, (x_train, y_train), l_indices)
-    gen_train_u = generator_generator(batch_size, x_train, u_indices)
-    test = (x_test, y_test)
+    if len(u_indices) == 0:
+        print('[WARN] No unlabeled items')
+        gen_train_u = None
+    else:
+        print("[INFO] {} items are unlabeled".format(len(u_indices)))
+        gen_train_u = generator_generator(batch_size, x_train, u_indices)
 
-    return (gen_train_l, len(l_indices)), (gen_train_u, len(u_indices)), (test, len(x_test))
+    test_dataset = (x_test, y_test)
+    print("[INFO] {} items are used for test".format(len(x_test)))
+
+    return (gen_train_l, len(l_indices)), (gen_train_u, len(u_indices)), test_dataset
